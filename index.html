@@ -2,177 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Clicker</title>
+    <title>Cookie Clicker+</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            background: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
         }
 
         .container {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 600px;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
         }
 
-        #scoreDisplay {
-            font-size: 4em;
-            margin: 20px 0;
-            color: #4CAF50;
-            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-        }
-
-        .slider-container {
-            margin: 30px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        #cpsSlider {
-            width: 100%;
-            height: 15px;
-            background: #333;
-            border-radius: 10px;
-            -webkit-appearance: none;
-        }
-
-        #cpsSlider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 25px;
-            height: 25px;
-            background: #4CAF50;
+        #clickButton {
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
+            background: #e74c3c;
+            border: 4px solid #c0392b;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
+            font-size: 24px;
+            color: white;
+            margin: 20px;
         }
 
-        #cpsSlider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
+        #clickButton:active {
+            transform: scale(0.95);
         }
 
         .stats {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            background: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px;
         }
 
-        .stat-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
+        .shop {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .shop-item {
+            background: #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .shop-item:hover {
+            background: #2980b9;
+        }
+
+        #resetHighscore {
+            background: #e67e22;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 id="scoreDisplay">0</h1>
+        <h1>Cookie Clicker+</h1>
         
-        <div class="slider-container">
-            <label for="cpsSlider">Clicks per Second: <span id="cpsValue">0</span></label>
-            <input type="range" id="cpsSlider" min="0" max="12000" value="0">
+        <div class="stats">
+            <h2>Cookies: <span id="counter">0</span></h2>
+            <h3>High Score: <span id="highScore">0</span></h3>
+            <h4>Auto-Clickers: <span id="autoClickers">0</span></h4>
         </div>
 
-        <div class="stats">
-            <div class="stat-box">
-                <h3>High Score</h3>
-                <div id="highScore">0</div>
+        <button id="clickButton">CLICK ME!<br><small>(<span id="clickPower">1</span> cookies/click)</small></button>
+
+        <div class="shop">
+            <div class="shop-item" id="upgradeClick">
+                <h3>Upgrade Click</h3>
+                <p>Cost: <span id="clickUpgradeCost">10</span> cookies</p>
             </div>
-            <div class="stat-box">
-                <h3>Total Clicks</h3>
-                <div id="totalClicks">0</div>
+            <div class="shop-item" id="buyAutoClicker">
+                <h3>Auto-Clicker</h3>
+                <p>Cost: <span id="autoClickerCost">50</span> cookies</p>
             </div>
         </div>
+
+        <button id="resetHighscore">Reset High Score</button>
     </div>
 
     <script>
-        let state = {
-            score: 0,
-            totalClicks: 0,
-            highScore: localStorage.getItem('highScore') || 0,
-            cps: 0,
-            accumulatedTime: 0
-        };
+        let counter = parseInt(localStorage.getItem('counter')) || 0;
+        let clickPower = parseInt(localStorage.getItem('clickPower')) || 1;
+        let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
+        let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        let clickUpgradeCost = parseInt(localStorage.getItem('clickUpgradeCost')) || 10;
+        let autoClickerCost = parseInt(localStorage.getItem('autoClickerCost')) || 50;
 
-        const elements = {
-            scoreDisplay: document.getElementById('scoreDisplay'),
-            cpsSlider: document.getElementById('cpsSlider'),
-            cpsValue: document.getElementById('cpsValue'),
-            highScore: document.getElementById('highScore'),
-            totalClicks: document.getElementById('totalClicks')
-        };
-
-        // High-performance game loop
-        let lastFrameTime = performance.now();
-        function gameLoop(currentTime) {
-            const deltaTime = (currentTime - lastFrameTime) / 1000;
-            lastFrameTime = currentTime;
-
-            if (state.cps > 0) {
-                const clicksThisFrame = state.cps * deltaTime;
-                state.score += clicksThisFrame;
-                state.totalClicks += clicksThisFrame;
-                
-                if (state.score > state.highScore) {
-                    state.highScore = state.score;
-                    localStorage.setItem('highScore', state.highScore);
-                }
-            }
-
-            updateDisplay();
-            requestAnimationFrame(gameLoop);
-        }
+        // DOM Elements
+        const counterElement = document.getElementById('counter');
+        const highScoreElement = document.getElementById('highScore');
+        const clickPowerElement = document.getElementById('clickPower');
+        const autoClickersElement = document.getElementById('autoClickers');
+        const clickUpgradeCostElement = document.getElementById('clickUpgradeCost');
+        const autoClickerCostElement = document.getElementById('autoClickerCost');
 
         function updateDisplay() {
-            elements.scoreDisplay.textContent = Math.floor(state.score);
-            elements.highScore.textContent = Math.floor(state.highScore);
-            elements.totalClicks.textContent = Math.floor(state.totalClicks);
+            counterElement.textContent = counter;
+            highScoreElement.textContent = highScore;
+            clickPowerElement.textContent = clickPower;
+            autoClickersElement.textContent = autoClickers;
+            clickUpgradeCostElement.textContent = clickUpgradeCost;
+            autoClickerCostElement.textContent = autoClickerCost;
+            
+            if (counter > highScore) {
+                highScore = counter;
+                localStorage.setItem('highScore', highScore);
+            }
         }
 
-        // CPS Slider
-        elements.cpsSlider.addEventListener('input', (e) => {
-            state.cps = parseInt(e.target.value);
-            elements.cpsValue.textContent = state.cps;
+        // Game Mechanics
+        document.getElementById('clickButton').addEventListener('click', () => {
+            counter += clickPower;
+            updateDisplay();
+            localStorage.setItem('counter', counter);
         });
 
-        // Manual clicking
-        document.addEventListener('click', (e) => {
-            if (e.target === elements.cpsSlider) return;
-            state.score++;
-            state.totalClicks++;
-            if (state.score > state.highScore) {
-                state.highScore = state.score;
-                localStorage.setItem('highScore', state.highScore);
+        document.getElementById('upgradeClick').addEventListener('click', () => {
+            if (counter >= clickUpgradeCost) {
+                counter -= clickUpgradeCost;
+                clickPower += 2;
+                clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+                localStorage.setItem('clickPower', clickPower);
+                localStorage.setItem('clickUpgradeCost', clickUpgradeCost);
+                updateDisplay();
             }
-            updateDisplay();
         });
 
-        // Start game loop
-        gameLoop(performance.now());
-
-        // Enable right-click reset
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            state.score = 0;
-            state.totalClicks = 0;
-            state.cps = 0;
-            elements.cpsSlider.value = 0;
-            elements.cpsValue.textContent = 0;
-            updateDisplay();
+        document.getElementById('buyAutoClicker').addEventListener('click', () => {
+            if (counter >= autoClickerCost) {
+                counter -= autoClickerCost;
+                autoClickers++;
+                autoClickerCost = Math.floor(autoClickerCost * 1.3);
+                localStorage.setItem('autoClickers', autoClickers);
+                localStorage.setItem('autoClickerCost', autoClickerCost);
+                updateDisplay();
+            }
         });
+
+        // Auto-clicker loop
+        setInterval(() => {
+            counter += autoClickers;
+            updateDisplay();
+            localStorage.setItem('counter', counter);
+        }, 1000);
+
+        // Reset High Score
+        document.getElementById('resetHighscore').addEventListener('click', () => {
+            if (confirm("Are you sure you want to reset your high score?")) {
+                highScore = 0;
+                localStorage.setItem('highScore', highScore);
+                updateDisplay();
+            }
+        });
+
+        // Initial display update
+        updateDisplay();
     </script>
 </body>
 </html>
