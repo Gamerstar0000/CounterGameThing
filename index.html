@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Clicker</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        #scoreDisplay {
+            font-size: 4em;
+            margin: 20px 0;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .slider-container {
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #cpsSlider {
+            width: 100%;
+            height: 15px;
+            background: #333;
+            border-radius: 10px;
+            -webkit-appearance: none;
+        }
+
+        #cpsSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #cpsSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .stats {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="scoreDisplay">0</h1>
+        
+        <div class="slider-container">
+            <label for="cpsSlider">Clicks per Second: <span id="cpsValue">0</span></label>
+            <input type="range" id="cpsSlider" min="0" max="12000" value="0">
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>High Score</h3>
+                <div id="highScore">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Total Clicks</h3>
+                <div id="totalClicks">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            score: 0,
+            totalClicks: 0,
+            highScore: localStorage.getItem('highScore') || 0,
+            cps: 0,
+            accumulatedTime: 0
+        };
+
+        const elements = {
+            scoreDisplay: document.getElementById('scoreDisplay'),
+            cpsSlider: document.getElementById('cpsSlider'),
+            cpsValue: document.getElementById('cpsValue'),
+            highScore: document.getElementById('highScore'),
+            totalClicks: document.getElementById('totalClicks')
+        };
+
+        // High-performance game loop
+        let lastFrameTime = performance.now();
+        function gameLoop(currentTime) {
+            const deltaTime = (currentTime - lastFrameTime) / 1000;
+            lastFrameTime = currentTime;
+
+            if (state.cps > 0) {
+                const clicksThisFrame = state.cps * deltaTime;
+                state.score += clicksThisFrame;
+                state.totalClicks += clicksThisFrame;
+                
+                if (state.score > state.highScore) {
+                    state.highScore = state.score;
+                    localStorage.setItem('highScore', state.highScore);
+                }
+            }
+
+            updateDisplay();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateDisplay() {
+            elements.scoreDisplay.textContent = Math.floor(state.score);
+            elements.highScore.textContent = Math.floor(state.highScore);
+            elements.totalClicks.textContent = Math.floor(state.totalClicks);
+        }
+
+        // CPS Slider
+        elements.cpsSlider.addEventListener('input', (e) => {
+            state.cps = parseInt(e.target.value);
+            elements.cpsValue.textContent = state.cps;
+        });
+
+        // Manual clicking
+        document.addEventListener('click', (e) => {
+            if (e.target === elements.cpsSlider) return;
+            state.score++;
+            state.totalClicks++;
+            if (state.score > state.highScore) {
+                state.highScore = state.score;
+                localStorage.setItem('highScore', state.highScore);
+            }
+            updateDisplay();
+        });
+
+        // Start game loop
+        gameLoop(performance.now());
+
+        // Enable right-click reset
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            state.score = 0;
+            state.totalClicks = 0;
+            state.cps = 0;
+            elements.cpsSlider.value = 0;
+            elements.cpsValue.textContent = 0;
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
