@@ -1,0 +1,98 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(45deg, #83a4d4, #b6fbff);
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.container {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 500px;
+}
+
+#scoreDisplay {
+    font-size: 4em;
+    color: #2c3e50;
+    margin: 20px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+#clickButton {
+    padding: 20px 40px;
+    font-size: 1.5em;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.3s;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.slider-container {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+#pointsSlider {
+    width: 60%;
+    height: 15px;
+    background: #ddd;
+    border-radius: 10px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+#pointsSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#pointsSlider:hover::-webkit-slider-thumb {
+    background: #45a049;
+}
+
+#sliderValue {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2c3e50;
+    min-width: 30px;
+}
+
+.stats {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #34495e;
+}
+
+.click-effect {
+    position: absolute;
+    color: #4CAF50;
+    font-size: 1.5em;
+    pointer-events: none;
+    animation: floatUp 0.8s ease-out;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
